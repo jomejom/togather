@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Event {
+  id            String     @id @default(cuid())
+  title         String
+  organizerName String
+  eventDate     String?
+  startTime     String?
+  endTime       String?
+  createdAt     DateTime   @default(now())
+  responses     Response[]
+  timeSlots     TimeSlot[]
+}
+
+model Response {
+  id           String   @id @default(cuid())
+  name         String
+  email        String
+  availability Json
+  createdAt    DateTime @default(now())
+  eventId      String
+  event        Event    @relation(fields: [eventId], references: [id])
+}
+
+model TimeSlot {
+  id        String   @id @default(cuid()) // unique ID for the timeslot
+  start     DateTime                      // when this time block starts
+  end       DateTime                      // when it ends
+
+  event     Event    @relation(fields: [eventId], references: [id]) // sets up a link to the Event model
+  eventId   String   // the ID of the event this time slot belongs to
+}
