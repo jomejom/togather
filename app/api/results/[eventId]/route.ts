@@ -1,19 +1,16 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
-// fetches all the responses for an event 
-// loop through each attendes availabilities JSON object
-// adds up the yes vote for each slot ID
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { eventId: string } }
-) {
+export async function GET(req: NextRequest) {
+  const url = new URL(req.url);
+  const pathSegments = url.pathname.split("/");
+  const eventId = pathSegments[pathSegments.length - 1]; // extracts the ID from the URL
+
   try {
     const responses = await prisma.response.findMany({
-      where: { eventId: params.eventId },
+      where: { eventId },
     });
 
-    // Initialize vote counts
     const voteCounts: Record<string, number> = {};
 
     responses.forEach((response) => {
