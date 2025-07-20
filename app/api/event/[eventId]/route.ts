@@ -1,23 +1,19 @@
 import { prisma } from "@/lib/prisma";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { eventId: string } }
-) {
-  try {
-    const event = await prisma.event.findUnique({
-      where: { id: params.eventId },
-      include: { timeSlots: true },
-    });
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const pathSegments = url.pathname.split("/");
+  const eventId = pathSegments[pathSegments.length - 1]; // get eventId from URL
 
-    if (!event) {
-      return NextResponse.json({ error: "Event not found" }, { status: 404 });
-    }
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+    include: { timeSlots: true },
+  });
 
-    return NextResponse.json(event);
-  } catch (error) {
-    console.error("Error fetching event:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  if (!event) {
+    return new NextResponse("Event not found", { status: 404 });
   }
+
+  return NextResponse.json(event);
 }
