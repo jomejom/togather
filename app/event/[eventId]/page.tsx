@@ -19,8 +19,9 @@ export default function EventPage({ params }: {params: { eventId: string}}) {
     const [votes, setVotes] = useState<Record<string, boolean | null>>({});
     const [currentSlotIndex, setCurrentSlotIndex] = useState(0);
 
+    // useEffect runs the function on every render of the component (e.g. when the state changes)
     useEffect(() => {
-        async function fetchEvent() {
+        async function fetchEvent() { // async + await - pause execution until promise is returned
           const res = await fetch(`/api/event/${eventId}`);
           const data = await res.json();
           setEventData(data);
@@ -29,6 +30,29 @@ export default function EventPage({ params }: {params: { eventId: string}}) {
         if (eventId) fetchEvent();
     }, [eventId]);
         
+    useEffect(() => {
+      async function submitVotes() {
+        if (
+          currentSlotIndex >= (eventData?.timeSlots.length || 0) &&
+          Object.keys(votes).length > 0 &&
+          eventId
+        ) {
+          await fetch("/api/submit-response", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              eventId,
+              name: "Anonymous", // update if you collect user input
+              email: "anonymous@example.com",
+              votes, // your state object like { slotId1: true, slotId2: false }
+            }),
+          });
+        }
+      }
+    
+      submitVotes();
+    }, [currentSlotIndex]);
+    
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#E2F5D7] px-6 py-6 text-black">
           {eventData ? (
@@ -74,7 +98,7 @@ export default function EventPage({ params }: {params: { eventId: string}}) {
               {currentSlotIndex >= eventData.timeSlots.length && (
                 <div className="mt-6 p-4 rounded shadow w-full max-w-xl text-center">
                   <h2 className="text-xl font-bold mb-4">Thanks for your responses!</h2>
-                  <p>Here's what you voted:</p>
+                  <p>Here&#39;s what you voted:</p>
                   <ul className="mt-2 space-y-1">
                     {eventData.timeSlots.map((slot) => (
                       <li key={slot.id}>

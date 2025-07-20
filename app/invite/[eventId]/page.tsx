@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation"; // used to get values from a dynamic route
+import Link from "next/link";
+
 
 export default function InvitePage() {
   const { eventId } = useParams();
@@ -46,6 +48,13 @@ export default function InvitePage() {
       >
         copy url
       </button>
+
+      <Link
+        href={`/results/${eventId}`}
+        className="mt-6 p-2 bg-blue-500 text-white rounded"
+      >
+       See my event
+      </Link>
     </div>
   );
 }
